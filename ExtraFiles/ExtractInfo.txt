@@ -1,0 +1,5 @@
+This MapWinGIS-5.2.4_extra_files.zip should be extract in the same level of \src folder and it includes all the GDAL dpendencies and some sample.
+Without extracting this folder it will be impossible to build this project.
+The MapWinGIS-5.2.4_extra_files.zip url at GD: https://drive.google.com/file/d/1B0agG10b3GvXQUQ5gyoXk8xHU8W2LMmR/view?usp=sharing
+Jamil G.
+22 May 2021
