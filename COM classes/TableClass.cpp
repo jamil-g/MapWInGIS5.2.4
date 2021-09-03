@@ -1361,6 +1361,10 @@ bool CTableClass::ReadRecord(long RowIndex)
 					// NOTE that this code differs from shapefiles being read from OGR, which are always UTF-8.
 					if (DBFGetCodePage(_dbfHandle) == nullptr || strcmp(DBFGetCodePage(_dbfHandle), "UTF-8") == 0)
 						// assume UTF-8
+
+						// Jamil Garzuzi, 17 May 2021
+						// Bug Fix, Well despite the mentioned above, the dll could not retrieve dbf with utf8 encoding propebbly
+						// and it was mandtory to add convertFromUtf8 function to fix this problem.
 						val->bstrVal = W2BSTR(Utility::ConvertFromUtf8(v));
 					else
 						// else assume it's already interpreted by associated code page
@@ -1467,11 +1471,15 @@ bool CTableClass::WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowI
 		{
 			if (val.vt == VT_BSTR)
 			{
-				nonstackString = Utility::SYS2A(val.bstrVal);
+				// Jamil Garzuzi, 17 May 2021
+				// Bug fix: wrong string encoding to utf8 when writing back string using Conserves Stack Memory fucntion from temp file
+				// to the dbf (shapefile).
+
+				//nonstackString = Utility::SYS2A(val.bstrVal);
 				//DBFWriteStringAttribute(dbfHandle, toRowIndex, i, nonstackString);
 				DBFWriteStringAttribute(dbfHandle, toRowIndex, i, Utility::ConvertToUtf8(val.bstrVal));
-				delete[] nonstackString;
-				nonstackString = NULL;
+				//delete[] nonstackString;
+				//nonstackString = NULL;
 			}
 			else if (val.vt == VT_I4)
 			{
@@ -1507,12 +1515,17 @@ bool CTableClass::WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowI
 		{
 			if (val.vt == VT_BSTR)
 			{
-				nonstackString = Utility::SYS2A(val.bstrVal);
+				// Jamil Garzuzi, 17 May 2021
+				// Bug fix: wrong string encoding to utf8 when writing back string using Conserves Stack Memory fucntion from temp file
+				// to the dbf (shapefile) with utf8 encoding.
+				
+
+				//nonstackString = Utility::SYS2A(val.bstrVal);
 				//long lval = atoi(nonstackString);
 				long lval = atoi(Utility::ConvertToUtf8(val.bstrVal));
 				DBFWriteIntegerAttribute(dbfHandle, toRowIndex, i, lval);
-				delete[] nonstackString;
-				nonstackString = NULL;
+				//delete[] nonstackString;
+				//nonstackString = NULL;
 			}
 			else if (val.vt == VT_I4)
 			{
@@ -1542,12 +1555,16 @@ bool CTableClass::WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowI
 		{
 			if (val.vt == VT_BSTR)
 			{
-				nonstackString = Utility::SYS2A(val.bstrVal);
+				// Jamil Garzuzi, 17 May 2021
+				// Bug fix: wrong string encoding to utf8 when writing back string using Conserves Stack Memory fucntion from temp file
+				// to the dbf (shapefile) with utf8 encoding.
+
+				//nonstackString = Utility::SYS2A(val.bstrVal);
 				//double dblval = Utility::atof_custom(nonstackString);
 				double dblval = Utility::atof_custom(Utility::ConvertToUtf8(val.bstrVal));
 				DBFWriteDoubleAttribute(dbfHandle, toRowIndex, i, dblval);
-				delete[] nonstackString;
-				nonstackString = NULL;
+				//delete[] nonstackString;
+				//nonstackString = NULL;
 			}
 			else if (val.vt == VT_I4)
 			{
@@ -1575,6 +1592,10 @@ bool CTableClass::WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowI
 				CString cval = OLE2CA(val.bstrVal);
 				if (cval.GetLength() == 8 && cval.Find('/') < 0)
 				{
+					// Jamil Garzuzi, 17 May 2021
+					// Bug fix: wrong string encoding to utf8 when writing back string from temp file
+					// to the dbf (shapefile) with utf8 encoding.
+
 					// already formatted properly, just write it back out
 					//DBFWriteStringAttribute(dbfHandle, toRowIndex, i, (LPCSTR)cval);
 					DBFWriteStringAttribute(dbfHandle, toRowIndex, i, Utility::ConvertToUtf8(val.bstrVal));
@@ -1619,6 +1640,11 @@ bool CTableClass::WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowI
 				// if no string, assume False
 				if (cval.GetLength() == 0) cval = "F";
 				// make sure to only write a single character
+
+				// Jamil Garzuzi, 17 May 2021
+				// Bug fix: wrong string encoding to utf8 when writing back string from temp file
+				// to the dbf (shapefile) with utf8 encoding.
+
 				//DBFWriteStringAttribute(dbfHandle, toRowIndex, i, cval.Left(1));
 				DBFWriteStringAttribute(dbfHandle, toRowIndex, i, Utility::ConvertToUtf8("F"));
 
@@ -1627,6 +1653,11 @@ bool CTableClass::WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowI
 			{
 				CString cval;
 				cval = (val.boolVal == VARIANT_TRUE) ? "T" : "F";
+
+				// Jamil Garzuzi, 17 May 2021
+				// Bug fix: wrong string encoding to utf8 when writing back string from temp file
+				// to the dbf (shapefile) with utf8 encoding.
+
 				//DBFWriteStringAttribute(dbfHandle, toRowIndex, i, cval);
 				DBFWriteLogicalAttribute(dbfHandle, toRowIndex, i, cval[0]);
 			}
